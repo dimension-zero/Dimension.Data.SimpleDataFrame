@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Property Group for general settings -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Dimension.SimpleDataFrame</RootNamespace>
+    <AssemblyName>ClassLibrary</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Property Groups for configurations -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <!-- Package References -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Xml.Linq" Version="4.3.0" />
+    <!-- Add other necessary packages based on project requirements -->
+  </ItemGroup>
+
+  <!-- Include Compile items -->
+  <ItemGroup>
+    <Compile Include="SimpleDataFrame\IfExistsBehaviour.cs" />
+    <Compile Include="SimpleDataFrame\IfMissingBehaviour.cs" />
+    <Compile Include="SimpleDataFrame\ISimpleDataFrameColumn.cs" />
+    <Compile Include="SimpleDataFrame\ISimpleDataFrameValue.cs" />
+    <Compile Include="SimpleDataFrame\SimpleDataFrame.cs" />
+    <Compile Include="SimpleDataFrame\SimpleDataFrameColumn.cs" />
+    <Compile Include="SimpleDataFrame\SimpleDataFrameRow.cs" />
+    <Compile Include="SimpleDataFrame\SimpleDataFrameValue.cs" />
+    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameColumnTests.cs" />
+    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameTests.cs" />
+    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameValueTests.cs" />
+  </ItemGroup>
+
+  <!-- Include Content items -->
+  <ItemGroup>
+    <Content Include=".gitignore" />
+  </ItemGroup>
+
+</Project>
