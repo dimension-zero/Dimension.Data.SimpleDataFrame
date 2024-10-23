@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Dimension.Library.Structures.SimpleDataFrame;
+namespace Dimension.Data.SimpleDataFrame.Tests;
 
 [TestFixture]
 public class SimpleDataFrameValueTests
