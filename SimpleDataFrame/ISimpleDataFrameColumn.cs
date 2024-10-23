@@ -90,8 +90,8 @@ public interface ISimpleDataFrameColumn<T>
 
     void AddValue(DateTime dateIndex, T newValue, IfExistsBehaviour ifExists = IfExistsBehaviour.Throw);
 
-    T? GetValue(DateTime dateIndex, IfMissingBehaviour ifMissing = IfMissingBehaviour.Throw);
-    bool TryGetValue(DateTime index, out T? value);
+    T?   GetValue(DateTime          dateIndex, IfMissingBehaviour            ifMissing = IfMissingBehaviour.Throw);
+    bool TryGetValue(DateTime       index,     out T?                        value);
     bool TryGetSimpleValue(DateTime dateIndex, out ISimpleDataFrameValue<T>? simpleDataFrameValue);
 
     void UpdateValue(DateTime dateIndex, T newValue, IfMissingBehaviour ifMissing = IfMissingBehaviour.Throw);

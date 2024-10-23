@@ -1,12 +1,14 @@
 ﻿using System;
 using NUnit.Framework;
+using Xunit;
+using Assert = NUnit.Framework.Assert;
 
 namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
 
 [TestFixture]
 public class SimpleDataFrameTests
 {
-    [Test]
+    [Test] [Fact]
     public void Constructor_InitializesEmptyDataFrame()
     {
         // Arrange & Act
@@ -17,7 +19,7 @@ public class SimpleDataFrameTests
         Assert.That(dataFrame.RowCount, Is.EqualTo(0));
     }
 
-    [Test]
+    [Test] [Fact]
     public void AddColumn_NewColumn_AddsSuccessfully()
     {
         // Arrange
@@ -33,7 +35,7 @@ public class SimpleDataFrameTests
         Assert.That(retrievedColumn, Is.Not.Null); // Corrected Assertion
     }
 
-    [Test]
+    [Test] [Fact]
     public void AddColumn_ExistingColumn_ThrowsException()
     {
         // Arrange
@@ -43,10 +45,10 @@ public class SimpleDataFrameTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => dataFrame.AddColumn(new SimpleDataFrameColumn<int>(columnName)));
-        Assert.That(ex.Message, Does.Contain($"Column {columnName} already exists."));
+        Assert.That(ex!.Message, Does.Contain($"Column {columnName} already exists."));
     }
 
-    [Test]
+    [Test] [Fact]
     public void DeleteColumn_ExistingColumn_DeletesSuccessfully()
     {
         // Arrange

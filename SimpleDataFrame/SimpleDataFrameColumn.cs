@@ -9,11 +9,11 @@ public class SimpleDataFrameColumn<T>
 {
     #region Members
 
-    public string                  Name    { get; private set; } = string.Empty;
-    public Dictionary<DateTime, T> Data    { get; }
-    public List<DateTime>          Indexes => this.Data.Keys.ToList();
+    public string Name { get; private set; } = string.Empty;
+    public Dictionary<DateTime, T> Data { get; }
+    public List<DateTime> Indexes => this.Data.Keys.ToList();
 
-    public int  Length    => this.Data.Count;
+    public int Length => this.Data.Count;
     public Type ValueType => typeof(T);
 
     #endregion Members
@@ -63,8 +63,8 @@ public class SimpleDataFrameColumn<T>
     /// <returns></returns>
     public T? this[DateTime dateIndex]
     {
-        get => this.Data[dateIndex];
-        set => this.Data[dateIndex] = value;
+        get => this.Data.ContainsKey(dateIndex) ? this.Data[dateIndex] : default;
+        set => this.Data[dateIndex] = value ?? throw new ArgumentNullException(nameof(value), "Null values cannot be assigned to the data frame.");
     }
 
     public bool ContainsIndex(DateTime dateIndex)
@@ -78,13 +78,24 @@ public class SimpleDataFrameColumn<T>
 
     public void AddValue(DateTime dateIndex, T newValue, IfExistsBehaviour ifExists = IfExistsBehaviour.Throw)
     {
-        if (!this.Data.ContainsKey(dateIndex) || ifExists == IfExistsBehaviour.Overwrite)
+        if (this.Data.ContainsKey(dateIndex))
         {
-            this.Data[dateIndex] = newValue;
+            switch (ifExists)
+            {
+                case IfExistsBehaviour.Overwrite:
+                    this.Data[dateIndex] = newValue;
+                    break;
+                case IfExistsBehaviour.Throw:
+                    throw new ArgumentException($"Value already exists for dateIndex {dateIndex}.");
+                case IfExistsBehaviour.Continue:
+                default:
+                    // For IfExistsBehaviour.Continue, do nothing
+                    break;
+            }
         }
         else
         {
-            throw new ArgumentException($"Value already exists for dateIndex {dateIndex}.");
+            this.Data[dateIndex] = newValue;
         }
     }
 
@@ -157,18 +168,16 @@ public class SimpleDataFrameColumn<T>
         switch (ifMissing)
         {
             case IfMissingBehaviour.Create:
-                this.AddValue(dateIndex, default, IfExistsBehaviour.Throw);
-                break;
+                this.AddValue(dateIndex, default(T) ?? throw new ArgumentNullException(nameof(value), "Null value cannot be created."), IfExistsBehaviour.Throw);
+                return default;
             case IfMissingBehaviour.Continue:
                 return default;
             case IfMissingBehaviour.Throw:
                 throw new KeyNotFoundException($"No value found for dateIndex {dateIndex}.");
-                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(ifMissing), ifMissing, null);
         }
 
-        return default;
     }
 
     public ISimpleDataFrameValue GetValueTyped(DateTime dateIndex, IfMissingBehaviour ifMissing = IfMissingBehaviour.Throw)
@@ -198,8 +207,11 @@ public class SimpleDataFrameColumn<T>
     public List<ISimpleDataFrameValue> GetValuesUntyped(List<DateTime> dateIndices, IfMissingBehaviour ifMissing)
     {
         var values = this.GetValuesInternal(dateIndices, ifMissing)
-            .Select(v => new SimpleDataFrameValue<T>(v.DateIndex, this.Name, v.Value));
-        return values.Cast<ISimpleDataFrameValue>().ToList();
+            .Select(v => new SimpleDataFrameValue<T>(v.DateIndex, this.Name, v.Value!)) // Use the null-forgiving operator to suppress the warning
+            .Cast<ISimpleDataFrameValue>()
+            .ToList();
+
+        return values;
     }
 
     public List<ISimpleDataFrameValue> GetValuesUntyped()
@@ -248,26 +260,16 @@ public class SimpleDataFrameColumn<T>
 
     public bool TryGetValueUntyped(DateTime dateIndex, out object? foundValue)
     {
+        if (this.TryGetValue(dateIndex, out var value))
+        {
+            foundValue = value;
+            return true;
+        }
         foundValue = null;
-        var method = typeof(SimpleDataFrameColumn<T>).GetMethod("TryGetValue", new[] { typeof(DateTime), typeof(T).MakeByRefType() });
-
-        if (method == null)
-        {
-            return false;
-        }
-
-        object[] parameters = new object[] { dateIndex, null };
-        var result = (bool)method.Invoke(this, parameters);
-
-        if (result)
-        {
-            foundValue = parameters[1];
-        }
-
-        return result;
+        return false;
     }
 
-    public bool TryGetValue(DateTime dateIndex, out T foundValue)
+    public bool TryGetValue(DateTime dateIndex, out T? foundValue)
     {
         // Ensure that 'foundValue' can hold null regardless of what T is.
         // This requires 'T' to be a reference type or a nullable value type.
@@ -287,7 +289,8 @@ public class SimpleDataFrameColumn<T>
     {
         if (this.TryGetValue(dateIndex, out var foundValue))
         {
-            simpleDataFrameValue = new SimpleDataFrameValue<T>(dateIndex, this.Name, foundValue);
+            // Handle possible null value using the null-forgiving operator (!)
+            simpleDataFrameValue = new SimpleDataFrameValue<T>(dateIndex, this.Name, foundValue!);
             return true;
         }
 
@@ -299,7 +302,7 @@ public class SimpleDataFrameColumn<T>
     {
         if (this.TryGetValue(dateIndex, out var foundValue))
         {
-            simpleDataFrameValue = new SimpleDataFrameValue<T>(dateIndex, this.Name, foundValue);
+            simpleDataFrameValue = new SimpleDataFrameValue<T?>(dateIndex, this.Name, foundValue);
             return true;
         }
 
@@ -332,23 +335,8 @@ public class SimpleDataFrameColumn<T>
             }
             else
             {
-                // TODO this is an error condition so is it even worth attempting to cast?
-                try
-                {
-                    var convertedValue = (T1)Convert.ChangeType(value, typeof(T1));
-                    if (selectorFunction(convertedValue))
-                    {
-                        matchingDates.Add(dateIndex);
-                    }
-                }
-                catch (InvalidCastException)
-                {
-                    throw new InvalidCastException($"Unable to cast value of type {value.GetType()} to type {typeof(T1)}.");
-                }
-                catch (FormatException)
-                {
-                    throw new FormatException($"Unable to cast value of type {value.GetType()} to type {typeof(T1)}.");
-                }
+                // If the cast fails, we don't attempt to convert to avoid exceptions
+                continue;
             }
         }
 
@@ -371,6 +359,11 @@ public class SimpleDataFrameColumn<T>
 
     public ISimpleDataFrameColumn<T> GetSubColumn(DateTime startDate, DateTime endDate)
     {
+        if (startDate > endDate)
+        {
+            throw new ArgumentException("Start date must be earlier than end date.");
+        }
+
         var subColumn = new SimpleDataFrameColumn<T>(this.Name + "_SubColumn");
         foreach (var kvp in this.Data.Where(kvp => kvp.Key >= startDate && kvp.Key <= endDate))
         {
@@ -399,7 +392,14 @@ public class SimpleDataFrameColumn<T>
         var subColumn = new SimpleDataFrameColumn<T1>(this.Name + "_SubColumn");
         foreach (var kvp in this.Data.Where(kvp => kvp.Key >= startDate && kvp.Key <= endDate))
         {
-            subColumn.Data.Add(kvp.Key, (T1)Convert.ChangeType(kvp.Value, typeof(T1)));
+            if (kvp.Value is T1 valueAsT1)
+            {
+                subColumn.Data.Add(kvp.Key, valueAsT1);
+            }
+            else
+            {
+                throw new InvalidCastException($"Cannot cast value of type {kvp.Value?.GetType()} to type {typeof(T1)}.");
+            }
         }
 
         return subColumn;
@@ -412,7 +412,15 @@ public class SimpleDataFrameColumn<T>
         {
             if (this.Data.ContainsKey(date))
             {
-                subColumn.Data.Add(date, (T1)Convert.ChangeType(this.Data[date], typeof(T1)));
+                if (this.Data[date] is T1 valueAsT1)
+                {
+                    subColumn.Data.Add(date, valueAsT1);
+                }
+                else
+                {
+                    var asString = this.Data[date]?.GetType();
+                    throw new InvalidCastException($"Cannot cast value of type {asString} to type {typeof(T1)}.");
+                }
             }
         }
 
@@ -438,19 +446,18 @@ public class SimpleDataFrameColumn<T>
                 case IfMissingBehaviour.Throw:
                     throw new KeyNotFoundException($"No value found for dateIndex {dateIndex}.");
                 case IfMissingBehaviour.Create:
-                    this.Data.Add(dateIndex, default);
+                    this.Data.Add(dateIndex, newValue);
                     break;
                 case IfMissingBehaviour.Continue:
+                    // Do nothing
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ifMissing), ifMissing, null);
             }
         }
-
-        throw new KeyNotFoundException($"No value found for dateIndex {dateIndex}.");
     }
 
-    public void UpdateValueUntyped(DateTime dateIndex, object newValue, IfMissingBehaviour ifMissing = IfMissingBehaviour.Throw)
+    public void UpdateValueUntyped(DateTime dateIndex, object? newValue, IfMissingBehaviour ifMissing = IfMissingBehaviour.Throw)
     {
         if (newValue is T typedValue)
         {
@@ -504,6 +511,15 @@ public class SimpleDataFrameColumn<T>
     #endregion Methods - Delete
 
     #endregion Methods - AGUD
+
+    #region Methods - Statistics
+
+    public T? Max() => this.Data.Values.Max();
+    public T? Min() => this.Data.Values.Min();
+    public IEnumerable<T> UniqueValues() => this.Data.Values.Distinct();
+
+
+    #endregion Methods - Statistics
 
     public ISimpleDataFrameColumn Clone()
     {

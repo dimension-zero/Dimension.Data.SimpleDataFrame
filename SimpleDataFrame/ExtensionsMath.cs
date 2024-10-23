@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame;
 
-public static class MathExtensions
+public static class ExtensionsMath
 {
     public static T Median<T>(this List<T> values)
         where T : INumber<T>

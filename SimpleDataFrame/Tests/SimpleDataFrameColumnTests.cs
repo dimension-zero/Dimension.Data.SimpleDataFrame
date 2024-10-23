@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Xunit;
+using Assert = NUnit.Framework.Assert;
 
 namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
 
@@ -8,6 +10,7 @@ namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
 public class SimpleDataFrameColumnTests
 {
     [Test]
+    [Fact]
     public void Constructor_InitializesEmptyColumn()
     {
         // Arrange & Act
@@ -19,6 +22,7 @@ public class SimpleDataFrameColumnTests
     }
 
     [Test]
+    [Fact]
     public void AddValue_NewValue_AddsSuccessfully()
     {
         // Arrange
@@ -35,6 +39,7 @@ public class SimpleDataFrameColumnTests
     }
 
     [Test]
+    [Fact]
     public void AddValue_ExistingValue_ThrowsException()
     {
         // Arrange
@@ -45,10 +50,11 @@ public class SimpleDataFrameColumnTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => column.AddValue(dateIndex, value));
-        Assert.That(ex.Message, Does.Contain($"Value already exists for dateIndex {dateIndex}."));
+        Assert.That(ex!.Message, Does.Contain($"Value already exists for dateIndex {dateIndex}."));
     }
 
     [Test]
+    [Fact]
     public void DeleteValue_ExistingValue_DeletesSuccessfully()
     {
         // Arrange
@@ -65,6 +71,7 @@ public class SimpleDataFrameColumnTests
     }
 
     [Test]
+    [Fact]
     public void UpdateValue_ExistingValue_UpdatesSuccessfully()
     {
         // Arrange
@@ -82,6 +89,7 @@ public class SimpleDataFrameColumnTests
     }
 
     [Test]
+    [Fact]
     public void UpdateValue_NonExistingValue_ThrowsException()
     {
         // Arrange
@@ -91,7 +99,9 @@ public class SimpleDataFrameColumnTests
 
         // Act & Assert
         var ex = Assert.Throws<KeyNotFoundException>(() => column.UpdateValue(dateIndex, newValue));
-        Assert.That(ex.Message, Does.Contain($"No value found for dateIndex {dateIndex}."));
+        
+        if (ex is not null)
+            Assert.That(ex.Message, Does.Contain($"No value found for dateIndex {dateIndex}."));
     }
 
     // Additional tests can be written to cover more scenarios

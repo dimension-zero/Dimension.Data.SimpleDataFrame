@@ -1,6 +1,6 @@
 ﻿namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame;
 
-public static class TypeExtensions
+public static class ExtensionsType
 {
     public static bool IsNumericType<T>(this T type)
     {

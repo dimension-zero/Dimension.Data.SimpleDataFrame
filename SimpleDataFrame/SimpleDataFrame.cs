@@ -15,8 +15,8 @@ public class SimpleDataFrame
     #region Members
 
     private readonly Dictionary<string, ISimpleDataFrameColumn> _columns;
-    public           int                                        ColumnCount => this._columns.Count;
-    public           int                                        RowCount    => this._columns.Count > 0 ? this._columns.Values.Select(c => c.Length).Max() : 0;
+    public int ColumnCount => this._columns.Count;
+    public int RowCount => this._columns.Count > 0 ? this._columns.Values.Select(c => c.Length).Max() : 0;
 
     #endregion Members
 
@@ -82,7 +82,7 @@ public class SimpleDataFrame
             {
                 case IfExistsBehaviour.Continue:
                     Debug.WriteLine($"Column of same name already exists.  Continuing as per {nameof(ifExists)} flag.  Returning existing column.");
-                    return (SimpleDataFrameColumn<T>) this._columns[columnName];
+                    return (SimpleDataFrameColumn<T>)this._columns[columnName];
                 case IfExistsBehaviour.Overwrite:
                     this._columns.Remove(columnName);
                     break;
@@ -118,9 +118,8 @@ public class SimpleDataFrame
             }
         }
 
-        // TODO MAKE GENERIC TYPE
         var genericType = typeof(SimpleDataFrameColumn<>).MakeGenericType(type);
-        var newColumn = (ISimpleDataFrameColumn)Activator.CreateInstance(genericType);
+        var newColumn = (ISimpleDataFrameColumn)Activator.CreateInstance(genericType)!;
         newColumn.Initialize(columnName);
 
         this._columns[columnName] = newColumn;
@@ -297,7 +296,6 @@ public class SimpleDataFrame
     {
         foreach (var value in valuesToAdd)
         {
-            // TODO add columnBehaviour: Create, Throw
             if (!this._columns.TryGetValue(value.ColumnName, out var column))
             {
                 switch (columnBehaviour)
@@ -482,7 +480,6 @@ public class SimpleDataFrame
                         var message = $"Cannot add new value {value} in column '{columnName}' as value {existingValue} already exists on date '{dateIndex}'.";
                         Debug.WriteLine(message);
                         throw new ArgumentException(message);
-                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(ifExists), ifExists, null);
                 }
@@ -704,16 +701,6 @@ public class SimpleDataFrame
         get
         {
             return this.GetRow(dateIndex, IfMissingBehaviour.Throw);
-            if (false)
-            {
-                var row = new Dictionary<string, ISimpleDataFrameValue>();
-                foreach (var column in this._columns)
-                {
-                    row[column.Key] = column.Value.GetValueTyped(dateIndex);
-                }
-
-                return row;
-            }
         }
     }
 
@@ -742,7 +729,8 @@ public class SimpleDataFrame
             var dateIndices = this.Indexes();
             foreach (var dateIndex in dateIndices)
             {
-                var row = new Dictionary<string, ISimpleDataFrameValue>();
+                // Nullable value to match expected nullability of the parameter
+                var row = new Dictionary<string, ISimpleDataFrameValue?>();
                 foreach (var kvp in this._columns)
                 {
                     if (kvp.Value.TryGetSimpleValueUntyped(dateIndex, out var simpleValue))
@@ -871,17 +859,24 @@ public class SimpleDataFrame
     }
 
     public Dictionary<T, SimpleDataFrame> GroupBy<T>(string columnName)
+        where T : notnull
     {
         var groups = new Dictionary<T, List<DateTime>>();
         foreach (var index in this.Indexes())
         {
-            var value = (T) this._columns[columnName].GetValueUntyped(index);
-            if (!groups.ContainsKey(value))
+            // Pattern matching with 'is' to check and cast in one step
+            if (this._columns[columnName].GetValueUntyped(index) is T typedValue)
             {
-                groups[value] = new List<DateTime>();
+                if (!groups.ContainsKey(typedValue))
+                {
+                    groups[typedValue] = new List<DateTime>();
+                }
+                groups[typedValue].Add(index);
             }
-
-            groups[value].Add(index);
+            else
+            {
+                throw new InvalidOperationException($"Value in column '{columnName}' at index '{index}' is not of type '{typeof(T)}'.");
+            }
         }
 
         var result = new Dictionary<T, SimpleDataFrame>();
@@ -911,16 +906,22 @@ public class SimpleDataFrame
             var valueType = column.Value.ValueType;
             if (valueType.IsNumericType())
             {
-                var columnType = column.Value.GetType();
-                var getValuesMethod = columnType.GetMethod(nameof(SimpleDataFrameColumn<T>.GetValues));
-                if (getValuesMethod != null)
+                // Using pattern matching to avoid casting issues
+                if (column.Value is SimpleDataFrameColumn<T> typedColumn)
                 {
-                    var genericGetValuesMethod = getValuesMethod.MakeGenericMethod(new Type[] { valueType });
-                    dynamic values = genericGetValuesMethod.Invoke(column.Value, null);
-                    // Convert the dynamic list to a strongly typed list using LINQ
-                    var numericValues = values.Cast<T>();
+                    // Filter out null values before applying the statistic function
+                    var numericValues = typedColumn.GetValues()
+                        .Where(v => v.Value != null)
+                        .Select(v => v.Value!); // Force non-nullable values for the statistic function
+
+                    // Applying the statistic function
                     var statistic = statisticFunction(numericValues);
                     results[column.Key] = statistic;
+                }
+                else
+                {
+                    // Handle the case where the column is not of the expected numeric type
+                    throw new InvalidCastException($"Column '{column.Key}' is not of the expected numeric type '{typeof(T)}'.");
                 }
             }
         }
@@ -953,12 +954,14 @@ public class SimpleDataFrame
             {
                 if (toDebug)
                 {
-                    debugOutputRows.Add(index.Date, new StringBuilder(index.ToString(dateFormat).PadRight(dateColWidth)));
+                    var asString = new StringBuilder(index.ToString(dateFormat).PadRight(dateColWidth));
+                    debugOutputRows?.Add(index.Date, asString);
                 }
 
                 if (csvFilePath.Length > 0)
                 {
-                    outputRows[index.Date] = new StringBuilder(index.ToString(dateFormat));
+                    if (outputRows is not null)
+                        outputRows[index.Date] = new StringBuilder(index.ToString(dateFormat));
                 }
             }
 
@@ -970,12 +973,14 @@ public class SimpleDataFrame
 
                 if (toDebug)
                 {
-                    debugHeaderRow.Append(kvp.Key.PadLeft(columnWidth));
+                    var asString = kvp.Key.PadLeft(columnWidth);
+                    debugHeaderRow?.Append(asString);
                 }
 
                 if (csvFilePath.Length > 0)
                 {
-                    csvHeaderRow.Append("," + kvp.Key);
+                    if (csvHeaderRow is not null)
+                        csvHeaderRow.Append("," + kvp.Key);
                 }
 
                 foreach (var index in indexes)
@@ -993,17 +998,23 @@ public class SimpleDataFrame
                     if (csvFilePath.Length > 0)
                     {
                         var valueFormattedForCsv = rawValue != null ? rawValue.ToString() : "";
-                        outputRows[index.Date].Append("," + valueFormattedForCsv); // always prepend with comma as Date is already in StringBuilder above
+                        var newCsvField = "," + valueFormattedForCsv; // always prepend with comma as Date is already in StringBuilder above
+                        if (outputRows is not null)
+                            outputRows[index.Date].Append(newCsvField);
                     }
                 }
             }
 
             if (toDebug)
             {
-                Debug.WriteLine(debugHeaderRow.ToString());
-                foreach (var row in debugOutputRows.Values)
+                var asString = debugHeaderRow?.ToString() ?? "";
+                Debug.WriteLine(asString);
+                if (debugOutputRows is not null)
                 {
-                    Debug.WriteLine(row.ToString());
+                    foreach (var row in debugOutputRows?.Values ?? Enumerable.Empty<StringBuilder>())
+                    {
+                        Debug.WriteLine(row.ToString());
+                    }
                 }
             }
 
@@ -1013,13 +1024,16 @@ public class SimpleDataFrame
                 using (var textWriter = new StreamWriter(csvFilePath))
                 using (var csvWriter = new CsvWriter(textWriter, CultureInfo.InvariantCulture))
                 {
-                    csvWriter.WriteField(csvHeaderRow.ToString());
+                    csvWriter.WriteField(csvHeaderRow?.ToString() ?? string.Empty);
                     csvWriter.NextRecord();
 
-                    foreach (var row in outputRows.Values)
+                    if (outputRows is not null)
                     {
-                        csvWriter.WriteField(row.ToString());
-                        csvWriter.NextRecord();
+                        foreach (var row in outputRows?.Values ?? Enumerable.Empty<StringBuilder>())
+                        {
+                            csvWriter.WriteField(row.ToString());
+                            csvWriter.NextRecord();
+                        }
                     }
                 }
             }
@@ -1030,36 +1044,40 @@ public class SimpleDataFrame
         }
     }
 
-
     private string FormatValue(object? value, Type valueType, string columnFormat)
     {
-        var formatted = "";
-        if (value != null)
+        try
         {
+            if (value == null)
+            {
+                return "";
+            }
+
             var useType = Nullable.GetUnderlyingType(valueType) ?? valueType;
 
             if (useType.IsNumericType())
             {
-                var asDouble = (double)value;
-                formatted = asDouble.ToString(columnFormat);
+                var asDouble = Convert.ToDouble(value);
+                return asDouble.ToString(columnFormat);
             }
             else if (useType == typeof(DateTime))
             {
                 var asDateTime = (DateTime)value;
-                formatted = asDateTime.ToString(columnFormat);
+                return asDateTime.ToString(columnFormat);
             }
             else
             {
-                formatted = value.ToString();
+                return value.ToString() ?? "";
             }
         }
-
-        if (formatted == null)
+        catch (FormatException ex)
         {
-            formatted = "";
+            throw new FormatException($"Failed to format value '{value}' of type '{valueType}' using format '{columnFormat}'.", ex);
         }
-
-        return formatted;
+        catch (InvalidCastException ex)
+        {
+            throw new InvalidCastException($"Invalid type cast for value '{value}' to '{valueType}'.", ex);
+        }
     }
 
     private int CalculateColumnWidth(IEnumerable<ISimpleDataFrameValue> values, string columnFormat, int nameLength, int intSpacing)

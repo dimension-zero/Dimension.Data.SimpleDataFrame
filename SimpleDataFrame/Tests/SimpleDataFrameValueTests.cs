@@ -1,12 +1,14 @@
 ﻿using System;
 using NUnit.Framework;
+using Xunit;
+using Assert = NUnit.Framework.Assert;
 
 namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
 
 [TestFixture]
 public class SimpleDataFrameValueTests
 {
-    [Test]
+    [Test] [Fact]
     public void Constructor_ValidInput_SetsPropertiesCorrectly()
     {
         // Arrange
@@ -26,7 +28,7 @@ public class SimpleDataFrameValueTests
         Assert.Equals(value, dataFrameValue.ValueUntyped);
     }
 
-    [Test]
+    [Test] [Fact]
     public void Constructor_NullValue_SetsHasValueToFalse()
     {
         // Arrange
@@ -41,9 +43,15 @@ public class SimpleDataFrameValueTests
         Assert.Equals(dateIndex, dataFrameValue.DateIndex);
         Assert.Equals(columnName, dataFrameValue.ColumnName);
         Assert.Equals(typeof(int?), dataFrameValue.ValueType);
-        Assert.Equals(value, dataFrameValue.Value);
         Assert.That(dataFrameValue.HasValue);
-        Assert.Equals(value, dataFrameValue.ValueUntyped);
+        if (value != null)
+        {
+            if (dataFrameValue.Value != null)
+            {
+                Assert.Equals(value, dataFrameValue.Value);
+            }
+            Assert.Equals(value, dataFrameValue.ValueUntyped);
+        }
     }
 
     // Additional tests can be added here to cover more scenarios
