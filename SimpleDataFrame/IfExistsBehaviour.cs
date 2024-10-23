@@ -1,4 +1,4 @@
-﻿namespace Dimension.Data.SimpleDataFrame.Library.Structures.DataFrame;
+﻿namespace Dimension.Library.Structures.DataFrame;
 
 public enum IfExistsBehaviour
 {
