@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace FractalSwingDetector.Library.Structures.DataFrame.Tests;
+namespace Dimension.Data.SimpleDataFrame.Library.Structures.DataFrame.Tests;
 
 [TestFixture]
 public class SimpleDataFrameColumnTests
