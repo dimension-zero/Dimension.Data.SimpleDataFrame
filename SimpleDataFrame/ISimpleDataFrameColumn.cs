@@ -1,4 +1,4 @@
-﻿namespace Dimension.Library.Structures.DataFrame;
+namespace Dimension.Library.Structures.SimpleDataFrame;
 
 public interface ISimpleDataFrameColumn
 {
