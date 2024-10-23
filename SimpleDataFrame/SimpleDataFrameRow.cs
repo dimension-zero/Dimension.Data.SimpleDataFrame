@@ -1,4 +1,4 @@
-﻿namespace Dimension.Library.Structures.SimpleDataFrame;
+﻿namespace Dimension.Data.SimpleDataFrame;
 
 public record SimpleDataFrameRow(DateTime DateIndex, Dictionary<string, ISimpleDataFrameValue?> Values)
 {
