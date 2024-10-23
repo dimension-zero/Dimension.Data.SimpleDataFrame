@@ -1,4 +1,4 @@
-﻿namespace FractalSwingDetector.Library.Structures.DataFrame;
+﻿namespace Dimension.Library.Structures.SimpleDataFrame;
 
 public class SimpleDataFrameColumn<T>
     : ISimpleDataFrameColumn<T>
