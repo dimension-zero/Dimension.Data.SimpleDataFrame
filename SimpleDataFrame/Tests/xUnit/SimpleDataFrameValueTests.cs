@@ -41,7 +41,7 @@ public class SimpleDataFrameValueTests
         Assert.Equal(dateIndex, dataFrameValue.DateIndex);
         Assert.Equal(columnName, dataFrameValue.ColumnName);
         Assert.Equal(typeof(int?), dataFrameValue.ValueType);
-        Assert.True(dataFrameValue.HasValue);
+        Assert.False(dataFrameValue.HasValue);
         if (value != null)
         {
             if (dataFrameValue.Value != null)
