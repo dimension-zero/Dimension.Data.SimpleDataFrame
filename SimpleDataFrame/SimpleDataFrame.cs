@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using CsvHelper;
 
-namespace FractalSwingDetector.Library.Structures.DataFrame;
+namespace Dimension.Library.Structures.SimpleDataFrame;
 
 public class SimpleDataFrame
 {
