@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Dimension.SimpleDataFrame</RootNamespace>
+    <RootNamespace>Dimension.Data.SimpleDataFrame</RootNamespace>
     <AssemblyName>ClassLibrary</AssemblyName>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -18,25 +18,12 @@
 
   <!-- Package References -->
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnitLite" Version="4.2.2" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Xml.Linq" Version="4.3.0" />
     <!-- Add other necessary packages based on project requirements -->
-  </ItemGroup>
-
-  <!-- Include Compile items -->
-  <ItemGroup>
-    <Compile Include="SimpleDataFrame\IfExistsBehaviour.cs" />
-    <Compile Include="SimpleDataFrame\IfMissingBehaviour.cs" />
-    <Compile Include="SimpleDataFrame\ISimpleDataFrameColumn.cs" />
-    <Compile Include="SimpleDataFrame\ISimpleDataFrameValue.cs" />
-    <Compile Include="SimpleDataFrame\SimpleDataFrame.cs" />
-    <Compile Include="SimpleDataFrame\SimpleDataFrameColumn.cs" />
-    <Compile Include="SimpleDataFrame\SimpleDataFrameRow.cs" />
-    <Compile Include="SimpleDataFrame\SimpleDataFrameValue.cs" />
-    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameColumnTests.cs" />
-    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameTests.cs" />
-    <Compile Include="SimpleDataFrame\Tests\SimpleDataFrameValueTests.cs" />
   </ItemGroup>
 
   <!-- Include Content items -->

@@ -1,4 +1,4 @@
-﻿namespace FractalSwingDetector.Library.Structures.DataFrame;
+﻿namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame;
 
 public enum IfExistsBehaviour
 {

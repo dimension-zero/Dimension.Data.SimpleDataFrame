@@ -1,13 +1,17 @@
-﻿namespace FractalSwingDetector.Library.Structures.DataFrame;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame;
 
 public class SimpleDataFrameColumn<T>
     : ISimpleDataFrameColumn<T>
 {
     #region Members
 
-    public string Name { get; private set; } = string.Empty;
-    public Dictionary<DateTime, T> Data { get; }
-    public List<DateTime> Indexes => this.Data.Keys.ToList();
+    public string                  Name    { get; private set; } = string.Empty;
+    public Dictionary<DateTime, T> Data    { get; }
+    public List<DateTime>          Indexes => this.Data.Keys.ToList();
 
     public int  Length    => this.Data.Count;
     public Type ValueType => typeof(T);

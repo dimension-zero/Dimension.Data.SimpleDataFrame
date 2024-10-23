@@ -1,12 +1,15 @@
-﻿namespace FractalSwingDetector.Library.Structures.DataFrame;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame;
 
 public interface ISimpleDataFrameColumn
 {
-    string Name { get; }
-    int Length { get; }
-    bool ContainsIndex(DateTime dateIndex);
-    List<DateTime> Indexes { get; }
-    Type ValueType { get; }
+    string         Name   { get; }
+    int            Length { get; }
+    bool           ContainsIndex(DateTime dateIndex);
+    List<DateTime> Indexes   { get; }
+    Type           ValueType { get; }
 
     #region Methods
 
