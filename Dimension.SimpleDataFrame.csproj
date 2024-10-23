@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Dimension.SimpleDataFrame</RootNamespace>
+    <RootNamespace>Dimension.Library.Structures.SimpleDataFrame</RootNamespace>
     <AssemblyName>ClassLibrary</AssemblyName>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
