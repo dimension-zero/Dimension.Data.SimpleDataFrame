@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using CsvHelper;
 
-namespace Dimension.Library.Structures.SimpleDataFrame;
+namespace Dimension.Data.SimpleDataFrame;
 
 public class SimpleDataFrame
 {
