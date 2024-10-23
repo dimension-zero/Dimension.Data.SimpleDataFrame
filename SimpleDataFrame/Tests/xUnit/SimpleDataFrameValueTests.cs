@@ -1,14 +1,12 @@
 ﻿using System;
-using NUnit.Framework;
 using Xunit;
-using Assert = NUnit.Framework.Assert;
 
-namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
+namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests.xUnit;
 
-[TestFixture]
+
 public class SimpleDataFrameValueTests
 {
-    [Test] [Fact]
+    [Fact]
     public void Constructor_ValidInput_SetsPropertiesCorrectly()
     {
         // Arrange
@@ -20,15 +18,15 @@ public class SimpleDataFrameValueTests
         var dataFrameValue = new SimpleDataFrameValue<int>(dateIndex, columnName, value);
 
         // Assert
-        Assert.Equals(dateIndex, dataFrameValue.DateIndex);
-        Assert.Equals(columnName, dataFrameValue.ColumnName);
-        Assert.Equals(typeof(int), dataFrameValue.ValueType);
-        Assert.Equals(value, dataFrameValue.Value);
-        Assert.That(dataFrameValue.HasValue);
-        Assert.Equals(value, dataFrameValue.ValueUntyped);
+        Assert.Equal(dateIndex, dataFrameValue.DateIndex);
+        Assert.Equal(columnName, dataFrameValue.ColumnName);
+        Assert.Equal(typeof(int), dataFrameValue.ValueType);
+        Assert.Equal(value, dataFrameValue.Value);
+        Assert.True(dataFrameValue.HasValue);
+        Assert.Equal(value, dataFrameValue.ValueUntyped);
     }
 
-    [Test] [Fact]
+    [Fact]
     public void Constructor_NullValue_SetsHasValueToFalse()
     {
         // Arrange
@@ -40,17 +38,17 @@ public class SimpleDataFrameValueTests
         var dataFrameValue = new SimpleDataFrameValue<int?>(dateIndex, columnName, value);
 
         // Assert
-        Assert.Equals(dateIndex, dataFrameValue.DateIndex);
-        Assert.Equals(columnName, dataFrameValue.ColumnName);
-        Assert.Equals(typeof(int?), dataFrameValue.ValueType);
-        Assert.That(dataFrameValue.HasValue);
+        Assert.Equal(dateIndex, dataFrameValue.DateIndex);
+        Assert.Equal(columnName, dataFrameValue.ColumnName);
+        Assert.Equal(typeof(int?), dataFrameValue.ValueType);
+        Assert.True(dataFrameValue.HasValue);
         if (value != null)
         {
             if (dataFrameValue.Value != null)
             {
-                Assert.Equals(value, dataFrameValue.Value);
+                Assert.Equal(value, dataFrameValue.Value);
             }
-            Assert.Equals(value, dataFrameValue.ValueUntyped);
+            Assert.Equal(value, dataFrameValue.ValueUntyped);
         }
     }
 

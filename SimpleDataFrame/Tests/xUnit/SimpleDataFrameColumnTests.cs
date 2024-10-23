@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
 using Xunit;
-using Assert = NUnit.Framework.Assert;
 
-namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests;
+namespace Dimension.Data.SimpleDataFrame.SimpleDataFrame.Tests.xUnit;
 
-[TestFixture]
 public class SimpleDataFrameColumnTests
 {
-    [Test]
     [Fact]
     public void Constructor_InitializesEmptyColumn()
     {
@@ -17,11 +13,10 @@ public class SimpleDataFrameColumnTests
         var column = new SimpleDataFrameColumn<int>("TestColumn");
 
         // Assert
-        Assert.Equals(column.Data.Count, 0);
-        Assert.Equals("TestColumn", column.Name);
+        Assert.Empty(column.Data);
+        Assert.Equal("TestColumn", column.Name);
     }
 
-    [Test]
     [Fact]
     public void AddValue_NewValue_AddsSuccessfully()
     {
@@ -34,11 +29,10 @@ public class SimpleDataFrameColumnTests
         column.AddValue(dateIndex, value);
 
         // Assert
-        Assert.That(column.ContainsIndex(dateIndex));
-        Assert.Equals(value, column[dateIndex]);
+        Assert.True(column.ContainsIndex(dateIndex));
+        Assert.Equal(value, column[dateIndex]);
     }
 
-    [Test]
     [Fact]
     public void AddValue_ExistingValue_ThrowsException()
     {
@@ -50,10 +44,9 @@ public class SimpleDataFrameColumnTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => column.AddValue(dateIndex, value));
-        Assert.That(ex!.Message, Does.Contain($"Value already exists for dateIndex {dateIndex}."));
+        Assert.Contains($"Value already exists for dateIndex {dateIndex}.", ex.Message);
     }
 
-    [Test]
     [Fact]
     public void DeleteValue_ExistingValue_DeletesSuccessfully()
     {
@@ -67,10 +60,9 @@ public class SimpleDataFrameColumnTests
         column.DeleteValue(dateIndex);
 
         // Assert
-        Assert.Equals(column.ContainsIndex(dateIndex), false);
+        Assert.False(column.ContainsIndex(dateIndex));
     }
 
-    [Test]
     [Fact]
     public void UpdateValue_ExistingValue_UpdatesSuccessfully()
     {
@@ -85,10 +77,9 @@ public class SimpleDataFrameColumnTests
         column.UpdateValue(dateIndex, newValue);
 
         // Assert
-        Assert.Equals(newValue, column[dateIndex]);
+        Assert.Equal(newValue, column[dateIndex]);
     }
 
-    [Test]
     [Fact]
     public void UpdateValue_NonExistingValue_ThrowsException()
     {
@@ -99,10 +90,9 @@ public class SimpleDataFrameColumnTests
 
         // Act & Assert
         var ex = Assert.Throws<KeyNotFoundException>(() => column.UpdateValue(dateIndex, newValue));
-        
+
         if (ex is not null)
-            Assert.That(ex.Message, Does.Contain($"No value found for dateIndex {dateIndex}."));
+            Assert.Contains($"No value found for dateIndex {dateIndex}.", ex.Message);
     }
 
-    // Additional tests can be written to cover more scenarios
 }

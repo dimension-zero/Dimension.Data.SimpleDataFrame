@@ -1,0 +1,51 @@
+﻿Crib Sheet: Fix for Missing Assemblies in .NET Test
+
+Separate NUnit and xUnit Tests: Keep NUnit and xUnit tests in separate classes. It’s fine to run the same tests in both, but ensure one class per framework.
+
+Steps:
+
+Update Test SDK:
+Ensure correct version of Microsoft.NET.Test.Sdk:
+dotnet add package Microsoft.NET.Test.Sdk --version <latest-version>
+
+
+Ensure Dependencies Are Installed:
+Add missing dependencies (e.g., Newtonsoft.Json, CsvHelper) via NuGet:
+dotnet add package Newtonsoft.Json --version 13.0.1
+dotnet add package CsvHelper --version <version>
+
+
+Ensure All Dependencies Are Up-to-Date:
+dotnet tool install --global dotnet-outdated
+dotnet outdated --upgrade
+
+
+Upgrade Specific Package:
+dotnet add package Newtonsoft.Json --version *
+
+
+Clean and Restore Project:
+Clean and restore to refresh dependencies:
+dotnet clean
+dotnet restore
+
+
+Clear NuGet Cache:
+Clear cached files to remove corrupted packages:
+dotnet nuget locals all --clear
+dotnet restore
+
+
+Update Workloads:
+Workloads are additional tools and libraries that extend the capabilities of .NET SDK for specific platforms, frameworks, or use cases (mobile, web, cloud).
+dotnet workload list
+dotnet workload update
+
+
+Run Tests in Isolation:
+Skip build and run tests directly:
+dotnet test --no-build --logger "console;verbosity=detailed"
+
+
+Check Output Directory:
+Verify the required .dll files are present in bin\Debug\netX.0\.
