@@ -1,4 +1,4 @@
-﻿namespace Dimension.Library.Structures.SimpleDataFrame;
+﻿namespace Dimension.Data.SimpleDataFrame;
 
 public class SimpleDataFrameValue<T>
     : ISimpleDataFrameValue<T>
